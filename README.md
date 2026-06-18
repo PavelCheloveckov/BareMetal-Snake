@@ -41,16 +41,38 @@ python3 build_floppy.py
 
 ## Запуск в эмуляторах
 
-### Limbo PC Emulator
+<details>
+<summary><b>Limbo PC Emulator</b></summary>
+
 1. Storage → Floppy A → указать `floppy.img`
 2. Boot Settings → Boot order → Floppy первым
 3. RAM: 32 MB, Architecture: x86
 4. Start
 
-### v86 (браузер)
+</details>
+
+<details>
+<summary><b>RetroArch</b></summary>
+
+1. Загрузить контент → Открыть... → указать `floppy.img`
+2. Выбрать `DOS (DOSBox-Pure)`
+3. После запуска DOSBox нажать `B` → выбрать `SVGA` → нажать `B`
+
+</details>
+
+<details>
+<summary><b>iSH Shell</b></summary>
+
+## ТЕСТИРОВАНИЕ В ПРОЦЕССЕ
+</details>
+
+<details>
+<summary><b>v86 (браузер)</b></summary>
+  
 1. Открыть https://copy.sh/v86/
 2. Floppy disk image → выбрать `floppy.img`
 3. Start
+</details>
 
 ## История версий
 - **v1-v5:** Базовая змейка, яблоки, таймер, улучшенное управление (CD-ROM only).
