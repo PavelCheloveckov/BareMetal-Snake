@@ -1,221 +1,222 @@
+.intel_syntax noprefix
 .code16
 GAME_START:
     cli
-    xorw %ax, %ax
-    movw %ax, %ds
-    movw %ax, %es
-    movw $0x9000, %ax
-    movw %ax, %ss
-    movw $0xFFFE, %sp
+    xor ax, ax
+    mov ds, ax
+    mov es, ax
+    mov ax, 0x9000
+    mov ss, ax
+    mov sp, 0xFFFE
     sti
-    movb $0x03, %al
-    int $0x10
-    movb $0x01, %ah
-    movw $0x2000, %cx
-    int $0x10
-    movw $0xB800, %ax
-    movw %ax, %es
-    xorw %di, %di
-    movw $2000, %cx
-    movw $0x0720, %ax
+    mov al, 0x03
+    int 0x10
+    mov ah, 0x01
+    mov cx, 0x2000
+    int 0x10
+    mov ax, 0xB800
+    mov es, ax
+    xor di, di
+    mov cx, 2000
+    mov ax, 0x0720
     rep stosw
-    movb $40, head_x
-    movb $12, head_y
-    movb $1, direction
-    movw $80, %ax
-    mulb %ah
-    movb head_x, %al
-    movb $0, %ah
-    addw $12*80+40, %ax
-    movw %ax, snake_body + 0
-    addw $1, %ax
-    movw %ax, snake_body + 2
-    addw $1, %ax
-    movw %ax, snake_body + 4
-    movw $2, head_idx
-    movw $0, tail_idx
-    movb $3, snake_len
+    mov byte ptr [head_x], 40
+    mov byte ptr [head_y], 12
+    mov byte ptr [direction], 1
+    mov ax, 80
+    mul ah
+    mov al, byte ptr [head_x]
+    mov ah, 0
+    add ax, 12*80+40
+    mov word ptr [snake_body], ax
+    add ax, 1
+    mov word ptr [snake_body+2], ax
+    add ax, 1
+    mov word ptr [snake_body+4], ax
+    mov word ptr [head_idx], 2
+    mov word ptr [tail_idx], 0
+    mov byte ptr [snake_len], 3
     call random_apple
 game_loop:
-    movb head_y, %al
-    movb $80, %bl
-    mulb %bl
-    movb head_x, %bl
-    movb $0, %bh
-    addw %bx, %ax
-    movw %ax, head_pos
-    shl $1, %ax
-    movw %ax, %di
-    movb $0xDB, %al
-    movb $0x0A, %ah
-    movw %ax, %es:(%di)
-    movw apple_pos, %di
-    shl $1, %di
-    movb $0x03, %al
-    movb $0x0C, %ah
-    movw %ax, %es:(%di)
-    movw $3, %cx
+    mov al, byte ptr [head_y]
+    mov bl, 80
+    mul bl
+    mov bl, byte ptr [head_x]
+    mov bh, 0
+    add bx, ax
+    mov word ptr [head_pos], bx
+    shl bx, 1
+    mov di, bx
+    mov al, 0xDB
+    mov ah, 0x0A
+    mov word ptr es:[di], ax
+    mov di, word ptr [apple_pos]
+    shl di, 1
+    mov al, 0x03
+    mov ah, 0x0C
+    mov word ptr es:[di], ax
+    mov cx, 3
     call wait_ticks
 key_loop:
-    movb $0x01, %ah
-    int $0x16
+    mov ah, 0x01
+    int 0x16
     jz no_key
-    movb $0x00, %ah
-    int $0x16
-    cmpb $0x48, %ah
+    mov ah, 0x00
+    int 0x16
+    cmp ah, 0x48
     je key_up
-    cmpb $0x50, %ah
+    cmp ah, 0x50
     je key_down
-    cmpb $0x4B, %ah
+    cmp ah, 0x4B
     je key_left
-    cmpb $0x4D, %ah
+    cmp ah, 0x4D
     je key_right
     jmp key_loop
 no_key:
-    movb direction, %al
-    cmpb $0, %al
+    mov al, byte ptr [direction]
+    cmp al, 0
     je move_up
-    cmpb $1, %al
+    cmp al, 1
     je move_right
-    cmpb $2, %al
+    cmp al, 2
     je move_down
     jmp move_left
 move_up:
-    decb head_y
-    cmpb $0xFF, head_y
+    dec byte ptr [head_y]
+    cmp byte ptr [head_y], 0xFF
     jne check_apple
-    movb $24, head_y
+    mov byte ptr [head_y], 24
     jmp check_apple
 move_right:
-    incb head_x
-    cmpb $80, head_x
+    inc byte ptr [head_x]
+    cmp byte ptr [head_x], 80
     jne check_apple
-    movb $0, head_x
+    mov byte ptr [head_x], 0
     jmp check_apple
 move_down:
-    incb head_y
-    cmpb $25, head_y
+    inc byte ptr [head_y]
+    cmp byte ptr [head_y], 25
     jne check_apple
-    movb $0, head_y
+    mov byte ptr [head_y], 0
     jmp check_apple
 move_left:
-    decb head_x
-    cmpb $0xFF, head_x
+    dec byte ptr [head_x]
+    cmp byte ptr [head_x], 0xFF
     jne check_apple
-    movb $79, head_x
+    mov byte ptr [head_x], 79
 check_apple:
-    movw head_pos, %ax
-    cmpw apple_pos, %ax
+    mov ax, word ptr [head_pos]
+    cmp ax, word ptr [apple_pos]
     je eat_apple
     jmp move_done
 eat_apple:
-    incb snake_len
-    movw apple_pos, %di
-    shl $1, %di
-    movb $0xDB, %al
-    movb $0x0A, %ah
-    movw %ax, %es:(%di)
+    inc byte ptr [snake_len]
+    mov di, word ptr [apple_pos]
+    shl di, 1
+    mov al, 0xDB
+    mov ah, 0x0A
+    mov word ptr es:[di], ax
     call random_apple
     jmp move_done_no_erase
 move_done:
-    incw head_idx
-    andw $0x00FF, head_idx
-    movw head_idx, %bx
-    addw %bx, %bx
-    movw head_pos, %ax
-    movw %ax, snake_body(%bx)
-    movw tail_idx, %bx
-    addw %bx, %bx
-    movw snake_body(%bx), %di
-    shl $1, %di
-    movw $0x0720, %ax
-    movw %ax, %es:(%di)
-    incw tail_idx
-    andw $0x00FF, tail_idx
+    inc word ptr [head_idx]
+    and word ptr [head_idx], 0x00FF
+    mov bx, word ptr [head_idx]
+    add bx, bx
+    mov ax, word ptr [head_pos]
+    mov word ptr [snake_body+bx], ax
+    mov bx, word ptr [tail_idx]
+    add bx, bx
+    mov di, word ptr [snake_body+bx]
+    shl di, 1
+    mov ax, 0x0720
+    mov word ptr es:[di], ax
+    inc word ptr [tail_idx]
+    and word ptr [tail_idx], 0x00FF
     jmp game_loop
 move_done_no_erase:
-    incw head_idx
-    andw $0x00FF, head_idx
-    movw head_idx, %bx
-    addw %bx, %bx
-    movw head_pos, %ax
-    movw %ax, snake_body(%bx)
+    inc word ptr [head_idx]
+    and word ptr [head_idx], 0x00FF
+    mov bx, word ptr [head_idx]
+    add bx, bx
+    mov ax, word ptr [head_pos]
+    mov word ptr [snake_body+bx], ax
     jmp game_loop
 
 wait_vsync:
-    pushw %dx
-    pushw %ax
-    movw $0x3DA, %dx
+    push dx
+    push ax
+    mov dx, 0x3DA
 .retrace:
-    inb %dx, %al
-    testb $8, %al
+    in al, dx
+    test al, 8
     jz .retrace
 .display:
-    inb %dx, %al
-    testb $8, %al
+    in al, dx
+    test al, 8
     jnz .display
-    popw %ax
-    popw %dx
+    pop ax
+    pop dx
     ret
 
 # Подпрограмма ожидания CX тиков
 wait_ticks:
-    pushw %ax
-    pushw %bx
-    pushw %dx
-    pushw %es
-    xorw %ax, %ax
-    movw %ax, %es
-    movw $0x46C, %bx
-    movw %es:(%bx), %ax
-    movw %ax, %dx
+    push ax
+    push bx
+    push dx
+    push es
+    xor ax, ax
+    mov es, ax
+    mov bx, 0x46C
+    mov ax, word ptr es:[bx]
+    mov dx, ax
 .tick_loop:
-    movw %es:(%bx), %ax
-    subw %dx, %ax
-    cmpw %cx, %ax
+    mov ax, word ptr es:[bx]
+    sub ax, dx
+    cmp ax, cx
     jb .tick_loop
-    popw %es
-    popw %dx
-    popw %bx
-    popw %ax
+    pop es
+    pop dx
+    pop bx
+    pop ax
     ret
 key_up:
-    cmpb $2, direction
+    cmp byte ptr [direction], 2
     je no_key
-    movb $0, direction
+    mov byte ptr [direction], 0
     jmp key_loop
 key_right:
-    cmpb $3, direction
+    cmp byte ptr [direction], 3
     je no_key
-    movb $1, direction
+    mov byte ptr [direction], 1
     jmp key_loop
 key_down:
-    cmpb $0, direction
+    cmp byte ptr [direction], 0
     je no_key
-    movb $2, direction
+    mov byte ptr [direction], 2
     jmp key_loop
 key_left:
-    cmpb $1, direction
+    cmp byte ptr [direction], 1
     je no_key
-    movb $3, direction
+    mov byte ptr [direction], 3
     jmp key_loop
 
 random_apple:
-    pushw %ax
-    pushw %bx
-    pushw %cx
-    pushw %dx
-    movb $0x00, %ah
-    int $0x1A
-    movw %dx, %ax
-    movw $2000, %bx
-    xorw %dx, %dx
-    divw %bx
-    movw %dx, apple_pos
-    popw %dx
-    popw %cx
-    popw %bx
-    popw %ax
+    push ax
+    push bx
+    push cx
+    push dx
+    mov ah, 0x00
+    int 0x1A
+    mov ax, dx
+    mov bx, 2000
+    xor dx, dx
+    div bx
+    mov word ptr [apple_pos], dx
+    pop dx
+    pop cx
+    pop bx
+    pop ax
     ret
 
 head_x:     .byte 42
