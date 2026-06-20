@@ -1,4 +1,4 @@
-# Snake ISO (IMG) - Модульная змейка (Forked from andrewrush codebase)
+# Snake ISO (IMG) - Модульная змейка (Forked from [andrewrush](https://github.com/andrewrush) codebase)
 
 ## Общая информация
 - **Проект:** Модульный Game ISO с загрузкой через Ventoy (Legacy BIOS) и floppy-образ для эмуляторов.
