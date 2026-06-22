@@ -9,11 +9,9 @@ all: floppy iso
 setup:
 	$(PYTHON) -m pip install pycdlib --break-system-packages
 
-# Сборка floppy.img
 floppy: loader_floppy.bin snake.bin
 	$(PYTHON) build_floppy.py
 
-# Сборка snake.iso
 iso: loader_cd.bin snake.bin
 	$(PYTHON) build_modular.py
 
